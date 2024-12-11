@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 # Subjeto
@@ -46,3 +48,50 @@ class Module(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+# Modelo de Contenido
+class Content(models.Model):
+    module = models.ForeignKey(    # Apuntamos el modelo de modula ya que este es el que contenie mùltiples contenidos
+        Module,
+        related_name='contents',
+        on_delete= models.CASCADE
+    )
+    content_type = models.ForeignKey(    # Campo ForeignKey al modelo ContentType
+        ContentType,
+        on_delete=models.CASCADE,
+        limit_choices_to = {    # Limitamos los objetos ContentType que se pueden usar para la relaciòn generica
+            'model__in': ('text', 'video', 'image', 'file')    # Utilizamos la bùesqueda de campo model__in para filtrar la consulta a los objetos ContenType cuyo atributo models sea 'text', 'video0, 'image', 'file'.
+        }
+    )
+    object_id = models.PositiveIntegerField()    # Alamacenamos la llave primaria del objeto relacionado
+    item = GenericForeignKey('content_type', 'object_id')    # Compo GenericForeignKey para el objeto relacionado que combina los dos campos anteriores
+
+
+# Modelo Abstracto
+class ItemBase(models.Model):
+    owner = models.ForeignKey(User,    # Usuario que creo el contenido
+                              related_name='%(class)s_relared',    # related_name diferentes para cada submodelo
+                              on_delete=models.CASCADE
+                              )
+    title = models.CharField(max_length=250)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+    
+    def __str__(self):
+        return self.title
+    
+class Text(ItemBase):    # Almacenamos contenido de texto
+    content = models.TextField()
+
+class File(ItemBase):    # Para almacenar archivos, como pdfs
+    file = models.FileField(upload_to='files')
+
+class Image(ItemBase):    # Para almacenar archivos de imagenes
+    file = models.FileField(upload_to='images')
+
+class Video(ItemBase):    # Para almacenar videos, utilizamos urlfiled para proporcionar una url de video con el fin de incrustarlo
+    url = models.URLField()
