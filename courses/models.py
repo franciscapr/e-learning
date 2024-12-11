@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from .fields import OrderField
 
 
 # Subjeto
@@ -45,9 +46,14 @@ class Module(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    order = OrderField(blank=True, for_fields=['course'])    # nmbramo el nuevo campo order y especificamos que el orden se calcula con respuesta el curso al establecer for_fiedls=['course]
+
+    class Meta:
+        ordering = ['order']
 
     def __str__(self):
-        return self.title
+        return f'{self.order}. {self.title}'
+    
     
 
 # Modelo de Contenido
@@ -66,6 +72,11 @@ class Content(models.Model):
     )
     object_id = models.PositiveIntegerField()    # Alamacenamos la llave primaria del objeto relacionado
     item = GenericForeignKey('content_type', 'object_id')    # Compo GenericForeignKey para el objeto relacionado que combina los dos campos anteriores
+    order = OrderField(blank=True, for_fields=['module'])
+
+    class Meta:
+        ordering = ['order']
+
 
 
 # Modelo Abstracto
