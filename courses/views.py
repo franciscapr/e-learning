@@ -13,6 +13,8 @@ from django.apps import apps
 from django.forms.models import modelform_factory
 from .models import Module, Content
 
+from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
+
 
 class OwnerMixin():
     def get_queryset(self):    
@@ -155,3 +157,20 @@ class ModuleContentListView(TemplateResponseMixin, View):
             Module, id=module_id, course__owner=request.user    # Obtenemos el objeto de Module con el ID proporcionado que pertenece al suaurio actual y renderiza una plantilla con al mòdulo dado.
         )
         return self.render_to_response({'module': module})
+    
+
+class ModuleOrderView(CsrfExemptMixin, JsonRequestResponseMixin, View):    # Actualizamos el orden de los mòdulos del curso
+    def post(self, request):
+        for id, order in self.request_json.items():
+            Module.objects.filter(
+                id=id, course__owner=request.user
+            ).update(order=order)
+        return self.render_json_response({'saved': 'OK'})
+    
+class ContentOrderView(CsrfExemptMixin, JsonRequestResponseMixin, View):
+    def post(self, request):
+        for id, order in self.request_json.items():
+            Content.objects.filter(
+                id=id, module__course__owner=request.user
+            ).update(order=order)
+        return self.render_json_response({'saved': 'OK'})
