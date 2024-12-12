@@ -145,3 +145,13 @@ class ContentDeleteView(View):    # Recuperamos el objeto de contenido con el ID
         content.item.delete()    # ELiminamos el objeto de contenido y redirige al usuario a la url module_content_list
         content.delete()
         return redirect('module_content_list', module.id)
+    
+
+class ModuleContentListView(TemplateResponseMixin, View):
+    template_name = 'courses/manage/module/content_list.html'
+
+    def get(self, request, module_id):
+        module = get_object_or_404(
+            Module, id=module_id, course__owner=request.user    # Obtenemos el objeto de Module con el ID proporcionado que pertenece al suaurio actual y renderiza una plantilla con al mòdulo dado.
+        )
+        return self.render_to_response({'module': module})
