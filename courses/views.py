@@ -3,6 +3,10 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 from .models import Course
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin,
+    PermissionRequiredMixin
+)
 
 
 class OwnerMixin():
@@ -15,7 +19,7 @@ class OwnerEditMixin:
         form.instance.owner = self.request.user    # Guardamos la instancia (en formularios de modelo) y redifirimos al usuario success_url
         return super().form_valid(form)
     
-class OwnerCourseMixin(OwnerMixin):    # Hereda de OwnerMixin
+class OwnerCourseMixin(OwnerMixin, LoginRequiredMixin, PermissionRequiredMixin):    # Hereda de OwnerMixin
     model = Course    # El modelo utilizado para los QuerySet.
     fields = ['subject', 'title', 'slug', 'overview']    # Los campos del modeloq ue se usaràn para cosntruir el formulario de modelos en CreateView y UpdateViee
     success_url = reverse_lazy('manage_course_list')    # Usado por CreteView, UpdateView, DeleteView para redirigir al usuario desuès de enviar correctamente el formulario o eliminar un objeto.
@@ -30,13 +34,15 @@ class OwnerCourseEditMixin(OwnerCourseMixin, OwnerEditMixin):
 class ManageCourseListView(OwnerCourseMixin, ListView):    # Lista los cursos creados porl usuario.
     model = Course
     template_name = 'courses/manage/course/list.html'    # Plantilla que lista los cursos.
+    permission_required = 'courses.view_course'
 
 class CourseCreateView(OwnerCourseEditMixin, CreateView):    # Usa un formulario de modelo para crear un nuevo objeto Course.
-    pass
+    permission_required = 'courses.add_course'
 
 class CourseUpdateView(OwnerCourseEditMixin, UpdateView):    # Permite editar un objeto Course.
-    pass
+    permission_required = 'courses.change_course'
 
 class CourseDeleteView(OwnerCourseMixin, DeleteView):    # Permite eliminar un objeto Course.
     template_name = 'courses/manage/course/delete.html'    # Plantilla para confirmar la eliminaciòn del curso.
+    permission_required = 'courses.delete_course'
 
