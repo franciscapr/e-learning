@@ -32,6 +32,11 @@ class Course(models.Model):
     slug = models.SlugField(max_length=200, unique=True)    # Slug del curso ---> Para las URL
     overview = models.TextField()    # UNa columna de tipo text para almacenar una descripciòn general del curos
     created = models.DateTimeField(auto_now_add=True)    # Fecha y hora en la que se creo el curso
+    students = models.ManyToManyField(
+        User,
+        related_name='courses_joined',
+        blank=True
+    )
 
     class Meta:
         ordering = ['-created']
