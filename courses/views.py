@@ -201,11 +201,12 @@ class CourseListView(TemplateResponseMixin, View):
                 }
             )
         
+
 class CourseDetailView(DetailView):
     model = Course
     template_name = 'courses/course/detail.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):    # Usamos el mètodo para incluir el formulario de inscripciòn en el contexto para renderizar las plantillas.
         context = super().get_context_data(**kwargs)
         context['enroll_form'] = CourseEnrollForm(
             initial={'course': self.object}
