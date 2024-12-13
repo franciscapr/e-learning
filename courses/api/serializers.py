@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from courses.models import Subject
+from courses.models import Subject, Course, Module
 from django.db.models import Count
 
 
@@ -24,3 +24,27 @@ class SubjectSerializer(serializers.ModelSerializer):
                     'total_courses',
                     'popular_courses'
                     ]    # Especificamos los campos del modelos en el fields
+
+
+
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = ['order', 'title', 'description']
+
+
+
+class CourseSerializer(serializers.ModelSerializer):
+    modules = ModuleSerializer(many=True, read_only=True)    # Indicamos que este campos es de solo lectura y que estamos serializando multiples objetos
+    
+    class Meta:
+        model = Course
+        fields = [
+            'id',
+            'subject',
+            'title',
+            'overview',
+            'created',
+            'owner',
+            'modules'
+        ]
