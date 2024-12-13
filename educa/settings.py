@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'embed_video',
     'debug_toolbar',
     'redisboard',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -159,3 +160,9 @@ CACHES = {
 # CACHE_MIDDLEWARE_ALIAS = 'default'
 # CACHE_MIDDLEWARE_SECONDS = 60 *15    # 15 minutos
 # CACHE_MIDDLEWARE_KEY_PREFIX = 'educar'
+
+REST_FRAMEWORL = {
+    'DEFAULT_PERMISSION_CLASSES': [    # Especificamos los permisos predeterminados para leer, crear, actualizar o eliminar objetos.
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
