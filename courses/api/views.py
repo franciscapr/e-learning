@@ -5,7 +5,12 @@ from django.db.models import Count
 from courses.api.pagination import StandardPagination
 from rest_framework import viewsets
 from courses.api.serializers import CourseSerializer, SubjectSerializer
-
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 
 # class SubjectListView(generics.ListAPIView):
 #     queryset = Subject.objects.annotate(total_courses=Count('courses'))     # Conjunto de consultas base para recuperar objectos - anotamos el conteo de cursos relacionados
@@ -21,7 +26,26 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SubjectSerializer
     pagination_class = StandardPagination
 
+
+
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):    # Acciones de solo lectura
     queryset = Course.objects.prefetch_related('modules')    # Obtenemos los objetos de module
     serializer_class = CourseSerializer
-    pagination_class = StandardPagination
+    @action(
+        detail=True,
+        methods=['post'],
+        authentication_classes=[BasicAuthentication],
+        permission_classes=[IsAuthenticated]
+    )
+
+
+
+
+class CourseEnrollView(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]    # Evitamos que los usuarios anonimos ingresen a las vistas
+
+    def post(self, request, pk, format=None):
+        course = get_object_or_404(Course, pk=pk)
+        course.students.add(request.user)
+        return Response({'enrolled': True})
