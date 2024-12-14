@@ -31,21 +31,25 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):    # Acciones de solo lectura
     queryset = Course.objects.prefetch_related('modules')    # Obtenemos los objetos de module
     serializer_class = CourseSerializer
-    @action(
+    @action(    # Especificamos que esta es una acciòn que se realiza sobre un solo objeto.
         detail=True,
-        methods=['post'],
-        authentication_classes=[BasicAuthentication],
-        permission_classes=[IsAuthenticated]
+        methods=['post'],    # Solo se permite el mètodo post
+        authentication_classes=[BasicAuthentication],    # Establecemos las clases de autenticaciò
+        permission_classes=[IsAuthenticated]    # y permisos
     )
-
-
-
-
-class CourseEnrollView(APIView):
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]    # Evitamos que los usuarios anonimos ingresen a las vistas
-
-    def post(self, request, pk, format=None):
-        course = get_object_or_404(Course, pk=pk)
+    def enroll(self, request, *args, **kwargs):
+        course = self.get_object()    # Recuperamos el objeto course
         course.students.add(request.user)
         return Response({'enrolled': True})
+
+
+
+
+# class CourseEnrollView(APIView):
+#     authentication_classes = [BasicAuthentication]
+#     permission_classes = [IsAuthenticated]    # Evitamos que los usuarios anonimos ingresen a las vistas
+
+#     def post(self, request, pk, format=None):
+#         course = get_object_or_404(Course, pk=pk)
+#         course.students.add(request.user)
+#         return Response({'enrolled': True})
