@@ -13,7 +13,7 @@ class Message(models.Model):
         related_name='chat_messages'
     )
     content = models.TextField()    # Almacenamos el contenido del mensaje
-    send_on = models.DateTimeField(auto_now_add=True)    # Para almacenar la fecha y la hora en que el objeto del mensaje se guarda por primera vez
+    sent_on = models.DateTimeField(auto_now_add=True)    # Para almacenar la fecha y la hora en que el objeto del mensaje se guarda por primera vez
 
     def __str__(self):
         return f'{self.user} on {self.course} at {self.sent_on}'
